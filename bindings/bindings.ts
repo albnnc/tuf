@@ -18,8 +18,8 @@ function readPointer(v: any): Uint8Array {
 }
 const opts = {
   name: "tuf",
-  url: (new URL("../target/debug", import.meta.url)).toString(),
-  policy: CachePolicy.NONE,
+  url: (new URL("../target/release", import.meta.url)).toString(),
+  policy: undefined,
 }
 const _lib = await prepare(opts, {
   fetch: {
@@ -28,6 +28,11 @@ const _lib = await prepare(opts, {
     nonblocking: true,
   },
 })
+export type Response = {
+  status: number
+  body: Array<number>
+  headers: Map<string, string>
+}
 export type Request = {
   method: string
   url: string
@@ -35,11 +40,6 @@ export type Request = {
   timeout: number | undefined | null
   accept_invalid_hostnames: boolean | undefined | null
   accept_invalid_certs: boolean | undefined | null
-}
-export type Response = {
-  status: number
-  body: Array<number>
-  headers: Map<string, string>
 }
 export function fetch(a0: Request) {
   const a0_buf = encode(JSON.stringify(a0))
