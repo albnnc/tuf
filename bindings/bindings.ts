@@ -28,17 +28,17 @@ const _lib = await prepare(opts, {
     nonblocking: true,
   },
 })
-export type Request = {
-  method: string
-  url: string
-  headers: Record<string, string> | undefined | null
-  accept_invalid_hostnames: boolean | undefined | null
-  accept_invalid_certs: boolean | undefined | null
-}
 export type Response = {
   status: number
   body: Array<number>
-  headers: Record<string, string>
+  headers: Map<string, string>
+}
+export type Request = {
+  method: string
+  url: string
+  headers: Map<string, string> | undefined | null
+  accept_invalid_hostnames: boolean | undefined | null
+  accept_invalid_certs: boolean | undefined | null
 }
 export function fetch(a0: Request) {
   const a0_buf = encode(JSON.stringify(a0))
