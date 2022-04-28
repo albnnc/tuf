@@ -1,0 +1,12 @@
+**/.idea
+**/.vscode
+**/.DS_Store
+tmp
+tmp.ts
+bindings.json
+target/*
+!target/release
+target/release/*
+!target/release/libtuf.dylib
+!target/release/libtuf.so
+!target/release/libtuf.dll
