@@ -12,7 +12,6 @@ pub struct Request {
   url: String,
   headers: Option<HashMap<String, String>>,
   timeout: Option<u64>,
-  accept_invalid_hostnames: Option<bool>,
   accept_invalid_certs: Option<bool>,
 }
 
@@ -27,7 +26,6 @@ pub struct Response {
 fn fetch(req: Request) -> Response {
   let client = Client::builder()
     .timeout(Duration::from_millis(req.timeout.unwrap_or(5000_u64)))
-    .danger_accept_invalid_hostnames(req.accept_invalid_hostnames.unwrap_or(false))
     .danger_accept_invalid_certs(req.accept_invalid_certs.unwrap_or(false))
     .build()
     .unwrap();

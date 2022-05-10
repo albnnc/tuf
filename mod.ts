@@ -5,7 +5,6 @@ export type TuRequest = {
   method?: string;
   headers?: Record<string, string>;
   timeout?: number;
-  acceptInvalidHostnames?: boolean;
   acceptInvalidCerts?: boolean;
 };
 
@@ -24,7 +23,6 @@ export async function tuFetch(req: TuRequest): Promise<TuResponse> {
     // deno-lint-ignore no-explicit-any
     headers: (req.headers as any) ?? undefined,
     timeout: req.timeout ? Math.floor(req.timeout) : undefined,
-    accept_invalid_hostnames: req.acceptInvalidHostnames ?? undefined,
     accept_invalid_certs: req.acceptInvalidCerts ?? undefined,
   });
   if (!status) {
@@ -39,7 +37,7 @@ export async function tuFetch(req: TuRequest): Promise<TuResponse> {
 }
 
 export interface KyReqHookOptions
-  extends Pick<TuRequest, "acceptInvalidHostnames" | "acceptInvalidCerts"> {
+  extends Pick<TuRequest, "acceptInvalidCerts"> {
   ignore?: (req: Request) => boolean;
 }
 

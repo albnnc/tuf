@@ -38,7 +38,6 @@ export type Request = {
   url: string
   headers: Map<string, string> | undefined | null
   timeout: number | undefined | null
-  accept_invalid_hostnames: boolean | undefined | null
   accept_invalid_certs: boolean | undefined | null
 }
 export function fetch(a0: Request) {
