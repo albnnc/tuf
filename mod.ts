@@ -38,16 +38,25 @@ export async function tuFetch(req: TuRequest): Promise<TuResponse> {
   };
 }
 
-export function createKyReqHook(
-  opts: Pick<TuRequest, "acceptInvalidHostnames" | "acceptInvalidCerts">
-) {
+export interface KyReqHookOptions
+  extends Pick<TuRequest, "acceptInvalidHostnames" | "acceptInvalidCerts"> {
+  ignore?: (req: Request) => boolean;
+}
+
+export function createKyReqHook({ ignore, ...rest }: KyReqHookOptions) {
   return async (req: Request): Promise<Request | Response> => {
-    const parsed = new URL(req.url);
-    if (
-      parsed.protocol !== "https:" ||
-      !parsed.hostname.match(/\d+\.\d+\.\d+\.\d+/)
-    ) {
-      return req;
+    if (ignore) {
+      if (ignore(req)) {
+        return req;
+      }
+    } else {
+      const parsed = new URL(req.url);
+      if (
+        parsed.protocol !== "https:" ||
+        !parsed.hostname.match(/\d+\.\d+\.\d+\.\d+/)
+      ) {
+        return req;
+      }
     }
     const resp = await tuFetch({
       url: req.url,
@@ -56,7 +65,7 @@ export function createKyReqHook(
         (p, [k, v]) => ({ ...p, [k]: v }),
         {}
       ),
-      ...opts,
+      ...rest,
     });
     return new Response(resp.body, {
       status: resp.status,
