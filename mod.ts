@@ -1,4 +1,21 @@
-import * as bin from "./bindings/bindings.ts";
+import mod from "./mod.json" assert { type: "json" };
+import { ffinch } from "./deps.ts";
+
+const lib = await ffinch.open(
+  {
+    ...mod,
+    lib: new URL("./target/release/", import.meta.url).toString(),
+  },
+  {
+    fetch: {
+      parameters: ["pointer"],
+      result: "pointer",
+      nonblocking: true,
+    },
+  }
+);
+
+const libFetch = ffinch.withJsonIo(lib.symbols.fetch);
 
 export type TuRequest = {
   url: string;
@@ -14,26 +31,19 @@ export type TuResponse = {
   body: Uint8Array;
 };
 
-// TODO: Remove casting when new version will be released.
-// See https://github.com/denoland/deno_bindgen/commit/58bffa2784bc58b931d4afd84e7860c53979b397
 export async function tuFetch(req: TuRequest): Promise<TuResponse> {
-  const { status, body, ...rest } = await bin.fetch({
+  const { status, body, ...rest } = await libFetch({
     url: req.url,
     method: req.method ?? "GET",
-    // deno-lint-ignore no-explicit-any
-    headers: (req.headers as any) ?? undefined,
+    headers: req.headers ?? undefined,
     timeout: req.timeout ? Math.floor(req.timeout) : undefined,
     accept_invalid_certs: req.acceptInvalidCerts ?? undefined,
   });
-  if (!status) {
-    throw new Error("Request failed");
-  }
   return {
     status,
-    body: new Uint8Array(body),
-    // deno-lint-ignore no-explicit-any
-    ...(rest as any),
-  };
+    body: Uint8Array.from(body as number[]),
+    ...rest,
+  } as TuResponse;
 }
 
 export interface KyReqHookOptions
