@@ -32,18 +32,22 @@ export type TuResponse = {
 };
 
 export async function tuFetch(req: TuRequest): Promise<TuResponse> {
-  const { status, body, ...rest } = await libFetch({
-    url: req.url,
-    method: req.method ?? "GET",
-    headers: req.headers ?? undefined,
-    timeout: req.timeout ? Math.floor(req.timeout) : undefined,
-    accept_invalid_certs: req.acceptInvalidCerts ?? undefined,
-  });
-  return {
-    status,
-    body: Uint8Array.from(body as number[]),
-    ...rest,
-  } as TuResponse;
+  try {
+    const { status, body, ...rest } = await libFetch({
+      url: req.url,
+      method: req.method ?? "GET",
+      headers: req.headers ?? undefined,
+      timeout: req.timeout ? Math.floor(req.timeout) : undefined,
+      accept_invalid_certs: req.acceptInvalidCerts ?? undefined,
+    });
+    return {
+      status,
+      body: Uint8Array.from(body as number[]),
+      ...rest,
+    } as TuResponse;
+  } catch {
+    throw new Error(`Failed to fetch ${req.url}`);
+  }
 }
 
 export interface KyReqHookOptions

@@ -58,29 +58,19 @@ fn fetch_wrapped(data: *const c_char) -> Result<*const c_char, Box<dyn Error>> {
     }
     None => {}
   }
-  let mut target_resp = Response {
-    status: 0,
-    body: Vec::new(),
-    headers: HashMap::new(),
-  };
-  let maybe_resp = client
+  let resp = client
     .request(Method::from_bytes(req.method.as_bytes())?, req.url)
     .headers(req_headers)
-    .send();
-  match maybe_resp {
-    Ok(res) => {
-      let mut res_headers = HashMap::new();
-      for (key, value) in res.headers().iter() {
-        res_headers.insert(String::from(key.as_str()), String::from(value.to_str()?));
-      }
-      target_resp = Response {
-        status: res.status().as_u16(),
-        body: res.bytes()?.to_vec(),
-        headers: res_headers,
-      }
-    }
-    Err(_) => {}
+    .send()?;
+  let mut resp_headers = HashMap::new();
+  for (key, value) in resp.headers().iter() {
+    resp_headers.insert(String::from(key.as_str()), String::from(value.to_str()?));
   }
+  let target_resp = Response {
+    status: resp.status().as_u16(),
+    body: resp.bytes()?.to_vec(),
+    headers: resp_headers,
+  };
   serialize_resp(target_resp)
 }
 
