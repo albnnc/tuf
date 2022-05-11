@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
 use std::ffi::CStr;
+use std::ffi::CString;
 use std::os::raw::c_char;
 use std::ptr;
 use std::str::FromStr;
@@ -26,7 +27,7 @@ pub struct Response {
   headers: HashMap<String, String>,
 }
 
-fn parse_req(data: *const c_char) -> Result<Request, Box<dyn Error>> {
+fn parse_req(data: *mut i8) -> Result<Request, Box<dyn Error>> {
   unsafe {
     let c_str = CStr::from_ptr(data).to_str()?;
     let req: Request = serde_json::from_str(c_str)?;
@@ -39,11 +40,11 @@ fn serialize_resp(resp: Response) -> Result<*const c_char, Box<dyn Error>> {
   let mut bytes = Vec::new();
   bytes.extend_from_slice(json.as_bytes());
   bytes.push(0);
-  let c_str = CStr::from_bytes_with_nul(&bytes[..])?;
-  Ok(c_str.as_ptr())
+  let c_string = CString::from_vec_with_nul(bytes)?;
+  Ok(c_string.into_raw())
 }
 
-fn fetch_wrapped(data: *const c_char) -> Result<*const c_char, Box<dyn Error>> {
+fn fetch_wrapped(data: *mut i8) -> Result<*const c_char, Box<dyn Error>> {
   let req = parse_req(data)?;
   let client = Client::builder()
     .timeout(Duration::from_millis(req.timeout.unwrap_or(5000_u64)))
@@ -75,6 +76,6 @@ fn fetch_wrapped(data: *const c_char) -> Result<*const c_char, Box<dyn Error>> {
 }
 
 #[no_mangle]
-fn fetch(data: *const c_char) -> *const c_char {
+fn fetch(data: *mut i8) -> *const i8 {
   fetch_wrapped(data).unwrap_or(ptr::null())
 }
