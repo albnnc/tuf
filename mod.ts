@@ -1,10 +1,10 @@
-import mod from "./mod.json" assert { type: "json" };
 import { ffinch } from "./deps.ts";
+import mod from "./mod.json" assert { type: "json" };
 
 const lib = await ffinch.open(
   {
     ...mod,
-    lib: new URL("./target/release/", import.meta.url).toString(),
+    libDir: new URL("./target/release/", import.meta.url).toString(),
   },
   {
     fetch: {
